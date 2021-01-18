@@ -30,7 +30,6 @@ export default {
   methods: {},
   watch: {
     date(value) {
-      console.log(value);
       this.$emit('DateSelect', value);
     },
   },

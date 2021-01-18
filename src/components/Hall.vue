@@ -6,11 +6,14 @@
           <li
             v-for="(seat, j) in row"
             :key="j"
+            :data-row="i"
+            :data-seat="j"
             class="seats__item"
-            @click="selectSeat(i, j, $event)"
+            :class="seat.status"
+            @click="selectSeat(i, j)"
             ref="seat"
           >
-            seat {{ j }}
+            {{ j }}
           </li>
         </ul>
       </li>
@@ -23,21 +26,28 @@ export default {
   name: 'SeatPicker',
   props: {
     rows: Array,
-    seatsBought: Boolean,
+    selectedSeats: Array,
   },
   methods: {
-    selectSeat(row, seat, e) {
+    selectSeat(row, seat) {
       if (this.rows[row][seat].status === 'reserved') return;
-      e.target.classList.toggle('select');
       this.$emit('SeatSelect', { info: this.rows[row][seat], row, seat });
     },
   },
   watch: {
-    seatsBought() {
+    selectedSeats() {
+      if (!this.$refs.seat) return;
       this.$refs.seat.forEach((ref) => {
         ref.classList.remove('select');
+        if (
+          this.selectedSeats.some(
+            (seat) =>
+              seat.row === +ref.getAttribute('data-row') &&
+              seat.seat === +ref.getAttribute('data-seat')
+          )
+        )
+          ref.classList.add('select');
       });
-      this.$emit('ClearSelects');
     },
   },
 };
@@ -45,6 +55,22 @@ export default {
 
 <style lang="scss">
 .select {
+  background: burlywood;
+}
+.reserved {
   opacity: 0.5;
+}
+.seats__list {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.seats__item {
+  height: 2rem;
+  width: 2rem;
+  margin: 0.2rem;
+  padding: 0;
+  line-height: 2rem;
 }
 </style>

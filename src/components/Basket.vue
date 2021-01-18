@@ -14,30 +14,11 @@
 export default {
   name: 'Basket',
   props: {
-    seat: Object,
-  },
-  data() {
-    return {
-      selectedSeats: [],
-    };
+    selectedSeats: Array,
   },
   methods: {
     onBuyClick() {
-      this.selectedSeats.forEach((el) => {
-        /* eslint no-param-reassign: "error" */
-        el.info.status = 'reserved';
-      });
-      this.selectedSeats = [];
       this.$emit('SeatsBought');
-    },
-  },
-  watch: {
-    seat() {
-      const repeatedIdx = this.selectedSeats.findIndex(
-        (el) => el.row === this.seat.row && el.seat === this.seat.seat
-      );
-      if (repeatedIdx !== -1) this.selectedSeats.splice(repeatedIdx, 1);
-      else this.selectedSeats.push(this.seat);
     },
   },
 };

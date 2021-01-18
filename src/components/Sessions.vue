@@ -8,11 +8,10 @@
       />
       <seat-picker
         :rows="getRows(selectedDate, selectedTime)"
-        :seatsBought="this.seatsBought"
-        @SeatSelect="selectedSeat = $event"
-        @ClearSelects="seatsBought = false"
+        :selectedSeats="selectedSeats"
+        @SeatSelect="addToSelected($event)"
       />
-      <basket :seat="selectedSeat" @SeatsBought="seatsBought = true" />
+      <basket :selectedSeats="selectedSeats" @SeatsBought="onBought" />
     </template>
   </div>
 </template>
@@ -42,10 +41,24 @@ export default {
       selectedDate: null,
       selectedTime: null,
       selectedSeat: null,
-      seatsBought: false,
+      selectedSeats: [],
     };
   },
   methods: {
+    onBought() {
+      this.selectedSeats.forEach((el) => {
+        /* eslint no-param-reassign: "error" */
+        el.info.status = 'reserved';
+      });
+      this.selectedSeats = [];
+    },
+    addToSelected(seat) {
+      const repeatedIdx = this.selectedSeats.findIndex(
+        (el) => el.row === seat.row && el.seat === seat.seat
+      );
+      if (repeatedIdx !== -1) this.selectedSeats.splice(repeatedIdx, 1);
+      else this.selectedSeats.push(seat);
+    },
     getDates() {
       return this.sessions.map((obj) => new Date(obj.date));
     },
