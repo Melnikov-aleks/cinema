@@ -2,10 +2,10 @@
   <div class="times">
     <ul class="times__list">
       <li
-        v-for="time in times"
+        v-for="(time, i) in times"
         class="times__item"
-        :key="time.id"
-        @click="$emit('TimeSelect', time)"
+        :key="i"
+        @click="selectTime(time)"
       >
         {{ time }}
       </li>
@@ -22,6 +22,10 @@ export default {
       default: () => [],
     },
   },
-  methods: {},
+  methods: {
+    selectTime(time) {
+      this.$emit('TimeSelect', time);
+    },
+  },
 };
 </script>

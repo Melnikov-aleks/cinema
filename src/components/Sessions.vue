@@ -1,10 +1,14 @@
 <template>
   <div class="sessions">
     <template v-if="sessions.length">
-      <date-picker :dates="getDates()" @DateSelect="selectedDate = $event" />
+      <date-picker
+        :dates="getDates()"
+        :clear="clear"
+        @DateSelect="onSelectDate($event)"
+      />
       <time-picker
         :times="getTimes(selectedDate)"
-        @TimeSelect="selectedTime = $event"
+        @TimeSelect="onSelectTime($event)"
       />
       <seat-picker
         :rows="getRows(selectedDate, selectedTime)"
@@ -42,9 +46,17 @@ export default {
       selectedTime: null,
       selectedSeat: null,
       selectedSeats: [],
+      allowSelect: false,
+      clear: false,
     };
   },
   methods: {
+    onSelectDate(date) {
+      this.selectedDate = date;
+    },
+    onSelectTime(time) {
+      this.selectedTime = time;
+    },
     onBought() {
       this.selectedSeats.forEach((el) => {
         /* eslint no-param-reassign: "error" */
@@ -53,11 +65,15 @@ export default {
       this.selectedSeats = [];
     },
     addToSelected(seat) {
-      const repeatedIdx = this.selectedSeats.findIndex(
-        (el) => el.row === seat.row && el.seat === seat.seat
-      );
-      if (repeatedIdx !== -1) this.selectedSeats.splice(repeatedIdx, 1);
-      else this.selectedSeats.push(seat);
+      if (this.allowSelect) {
+        const repeatedIdx = this.selectedSeats.findIndex(
+          (el) => el.row === seat.row && el.seat === seat.seat
+        );
+        if (repeatedIdx !== -1) this.selectedSeats.splice(repeatedIdx, 1);
+        else this.selectedSeats.push(seat);
+      } else {
+        this.selectedSeats = [];
+      }
     },
     getDates() {
       return this.sessions.map((obj) => new Date(obj.date));
@@ -85,6 +101,33 @@ export default {
         }
       });
       return rows;
+    },
+  },
+  watch: {
+    selectedDate() {
+      this.selectedSeats = [];
+      this.selectedTime = null;
+    },
+    selectedTime(time) {
+      this.selectedSeats = [];
+      let separatedTime = null;
+      if (time) separatedTime = time.match(/(\d{1,2})\.(\d{1,2})/);
+      if (separatedTime) {
+        const date = new Date(this.selectedDate);
+        date.setHours(separatedTime[1]);
+        date.setMinutes(separatedTime[2]);
+        this.allowSelect = date > Date.now();
+      } else this.allowSelect = false;
+    },
+    sessions() {
+      this.clear = true;
+      this.selectedDate = null;
+      this.selectedTime = null;
+      this.selectedSeat = null;
+      this.selectedSeats = [];
+      this.$nextTick(() => {
+        this.clear = false;
+      });
     },
   },
 };

@@ -17,6 +17,7 @@ export default {
       type: Array,
       default: () => [],
     },
+    clear: Boolean,
   },
   data() {
     return {
@@ -29,8 +30,11 @@ export default {
   },
   methods: {},
   watch: {
+    clear(cl) {
+      if (cl) this.date = '';
+    },
     date(value) {
-      this.$emit('DateSelect', value);
+      if (value) this.$emit('DateSelect', value);
     },
   },
 };
