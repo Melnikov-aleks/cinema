@@ -1,15 +1,38 @@
 import API, { imageBase } from '@/utils/api';
 import Sessions from '@/utils/sessionsGenerator';
 
-export default async function Timetable() {
-  const timetable = [];
-  const data = await new API().get();
-  data.results.forEach(film => {
-    timetable.push({ title: film.title, backdrop: imageBase + film.backdrop_path });
-  });
-  timetable.forEach(film => {
-    // eslint-disable-next-line no-param-reassign
-    film.sessions = new Sessions(6, 4);
-  });
-  return timetable;
+export default class Timetable {
+  constructor() {
+    this.timetable = [];
+  }
+
+  async get() {
+    await this.check();
+    return this.timetable;
+  }
+
+  async check() {
+    if (
+      !localStorage.getItem('timetable') ||
+      Date.now() - JSON.parse(localStorage.getItem('timetable')).timestamp > 86400000
+    )
+      await this.create();
+    else this.timetable = JSON.parse(localStorage.getItem('timetable')).data;
+  }
+
+  async create() {
+    console.log('cr');
+    const response = await new API().get();
+    response.results.forEach(film => {
+      this.timetable.push({ title: film.title, backdrop: imageBase + film.backdrop_path });
+    });
+    this.timetable.forEach(film => {
+      // eslint-disable-next-line no-param-reassign
+      film.sessions = new Sessions(6, 4);
+    });
+    localStorage.setItem(
+      'timetable',
+      JSON.stringify({ timestamp: Date.now(), data: this.timetable })
+    );
+  }
 }

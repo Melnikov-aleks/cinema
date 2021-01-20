@@ -1,6 +1,12 @@
 <template>
   <div class="films-container">
-    <el-carousel class="films" height="150px" :autoplay="false">
+    <el-carousel
+      class="films"
+      height="150px"
+      :autoplay="false"
+      type="card"
+      trigger="click"
+    >
       <el-carousel-item
         v-for="(film, i) in films"
         :key="i"
@@ -18,11 +24,6 @@ export default {
   name: 'FilmsList',
   props: {
     films: Array,
-  },
-  data() {
-    return {
-      test1: { one: 1 },
-    };
   },
   methods: {
     selectFilm(i) {

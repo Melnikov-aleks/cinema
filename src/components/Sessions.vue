@@ -63,6 +63,7 @@ export default {
         el.info.status = 'reserved';
       });
       this.selectedSeats = [];
+      this.$emit('Bought');
     },
     addToSelected(seat) {
       if (this.allowSelect) {

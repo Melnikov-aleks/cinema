@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <FilmsList :films="getFilms()" @SelectFilm="selectedFilmId = $event" />
-    <SessionsList :sessions="getSessions()" />
+    <FilmsList :films="getFilms()" @SelectFilm="selectFilm($event)" />
+    <SessionsList :sessions="getSessions()" @Bought="onBought" />
   </div>
 </template>
 
@@ -17,22 +17,31 @@ export default {
     FilmsList,
     SessionsList,
   },
-  async created() {
-    this.filmList = await Timetable();
+  async mounted() {
+    this.timeTable = await new Timetable().get();
   },
   data() {
     return {
       selectedFilmId: null,
-      filmList: [],
+      timeTable: [],
     };
   },
   methods: {
+    onBought() {
+      localStorage.setItem(
+        'timetable',
+        JSON.stringify({ timestamp: Date.now(), data: this.timeTable })
+      );
+    },
+    selectFilm(id) {
+      this.selectedFilmId = id;
+    },
     getFilms() {
-      return this.filmList.map((film) => ({ title: film.title }));
+      return this.timeTable.map((film) => ({ title: film.title }));
     },
     getSessions() {
       if (this.selectedFilmId === null) return [];
-      return this.filmList[this.selectedFilmId].sessions;
+      return this.timeTable[this.selectedFilmId].sessions;
     },
   },
 };
