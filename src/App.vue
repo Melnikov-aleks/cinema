@@ -1,7 +1,11 @@
 <template>
   <div id="app">
     <FilmsList :films="getFilms()" @SelectFilm="selectFilm($event)" />
-    <SessionsList :sessions="getSessions()" @Bought="onBought" />
+    <SessionsList
+      :sessions="getSessions()"
+      @Bought="onBought"
+      v-if="selectedFilmId !== null"
+    />
   </div>
 </template>
 
@@ -37,7 +41,10 @@ export default {
       this.selectedFilmId = id;
     },
     getFilms() {
-      return this.timeTable.map((film) => ({ title: film.title }));
+      return this.timeTable.map((film) => ({
+        title: film.title,
+        backdrop: film.backdrop,
+      }));
     },
     getSessions() {
       if (this.selectedFilmId === null) return [];
@@ -50,10 +57,9 @@ export default {
 <style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding: 0 0 1rem;
 }
 </style>

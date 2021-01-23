@@ -21,14 +21,13 @@ export default class Timetable {
   }
 
   async create() {
-    console.log('cr');
     const response = await new API().get();
     response.results.forEach(film => {
       this.timetable.push({ title: film.title, backdrop: imageBase + film.backdrop_path });
     });
     this.timetable.forEach(film => {
       // eslint-disable-next-line no-param-reassign
-      film.sessions = new Sessions(6, 4);
+      film.sessions = new Sessions(16, 12);
     });
     localStorage.setItem(
       'timetable',

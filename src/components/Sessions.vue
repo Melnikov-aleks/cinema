@@ -1,21 +1,34 @@
 <template>
   <div class="sessions">
     <template v-if="sessions.length">
-      <date-picker
-        :dates="getDates()"
-        :clear="clear"
-        @DateSelect="onSelectDate($event)"
-      />
-      <time-picker
-        :times="getTimes(selectedDate)"
-        @TimeSelect="onSelectTime($event)"
-      />
-      <seat-picker
-        :rows="getRows(selectedDate, selectedTime)"
-        :selectedSeats="selectedSeats"
-        @SeatSelect="addToSelected($event)"
-      />
-      <basket :selectedSeats="selectedSeats" @SeatsBought="onBought" />
+      <div class="sessions__aside" :class="AsideClasses()">
+        <date-picker
+          :dates="getDates()"
+          :clear="clear"
+          @DateSelect="onSelectDate($event)"
+          :class="AsideClasses()"
+        />
+        <time-picker
+          v-if="selectedDate"
+          :times="getTimes(selectedDate)"
+          :selectedTime="selectedTime"
+          @TimeSelect="onSelectTime($event)"
+          :class="AsideClasses()"
+        />
+        <basket
+          v-if="selectedTime"
+          :selectedSeats="selectedSeats"
+          @SeatsBought="onBought"
+        />
+      </div>
+      <transition name="showing">
+        <seat-picker
+          v-if="selectedTime"
+          :rows="getRows(selectedDate, selectedTime)"
+          :selectedSeats="selectedSeats"
+          @SeatSelect="addToSelected($event)"
+        />
+      </transition>
     </template>
   </div>
 </template>
@@ -51,16 +64,20 @@ export default {
     };
   },
   methods: {
+    AsideClasses() {
+      return { moved: this.selectedTime };
+    },
     onSelectDate(date) {
       this.selectedDate = date;
     },
-    onSelectTime(time) {
-      this.selectedTime = time;
+    onSelectTime(timeObj) {
+      this.selectedTime = timeObj.time;
+      this.allowSelect = timeObj.available;
     },
     onBought() {
       this.selectedSeats.forEach((el) => {
-        /* eslint no-param-reassign: "error" */
-        el.info.status = 'reserved';
+        // eslint-disable-next-line no-param-reassign
+        el.info.s = 'r';
       });
       this.selectedSeats = [];
       this.$emit('Bought');
@@ -86,7 +103,19 @@ export default {
           new Date(obj.date).toDateString() ===
           new Date(selectedDate).toDateString()
         )
-          times = obj.seanses.map((seans) => seans.time);
+          times = obj.seanses.map((seans) => {
+            const timeObj = { time: seans.time };
+            let separatedTime = null;
+            if (seans.time)
+              separatedTime = seans.time.match(/(\d{1,2})\.(\d{1,2})/);
+            if (separatedTime) {
+              const date = new Date(this.selectedDate);
+              date.setHours(separatedTime[1]);
+              date.setMinutes(separatedTime[2]);
+              timeObj.available = date > Date.now();
+            } else timeObj.available = false;
+            return timeObj;
+          });
       });
       return times;
     },
@@ -109,16 +138,8 @@ export default {
       this.selectedSeats = [];
       this.selectedTime = null;
     },
-    selectedTime(time) {
+    selectedTime() {
       this.selectedSeats = [];
-      let separatedTime = null;
-      if (time) separatedTime = time.match(/(\d{1,2})\.(\d{1,2})/);
-      if (separatedTime) {
-        const date = new Date(this.selectedDate);
-        date.setHours(separatedTime[1]);
-        date.setMinutes(separatedTime[2]);
-        this.allowSelect = date > Date.now();
-      } else this.allowSelect = false;
     },
     sessions() {
       this.clear = true;
@@ -135,4 +156,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.sessions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  justify-content: center;
+}
+.sessions__aside {
+  margin: 0 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 </style>

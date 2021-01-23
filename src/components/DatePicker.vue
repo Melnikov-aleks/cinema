@@ -39,3 +39,12 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.date-picker {
+  margin: 0;
+}
+.moved {
+  transition: all 0.5s ease-in;
+  margin-right: 1rem;
+}
+</style>
